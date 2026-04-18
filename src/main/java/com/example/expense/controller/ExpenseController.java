@@ -1,11 +1,15 @@
 package com.example.expense.controller;
 
 import com.example.expense.dtos.CreateExpenseRequest;
+import com.example.expense.dtos.ExpensePageResponse;
+import com.example.expense.dtos.ExpenseResponse;
 import com.example.expense.dtos.UpdateExpenseRequest;
 import com.example.expense.entity.Expense;
 import com.example.expense.service.ExpenseService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,15 +35,12 @@ public class ExpenseController {
     }
 
     @GetMapping("/getall")
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-
-        List<Expense> list = expenseService.getAllExpenses();
-
-        return ResponseEntity.ok(list);
+    public ResponseEntity<ExpensePageResponse> getAllExpenses(Pageable pageable) {
+        return ResponseEntity.ok(expenseService.getAllExpenses(pageable));
     }
 
     // 2. Get expenses by name
-    @GetMapping("/{expenseId}")
+    @GetMapping("/getbyId/{expenseId}")
     public ResponseEntity<Expense> getById(@PathVariable String expenseId) {
 
         Expense expense = expenseService.getExpenseById(expenseId);

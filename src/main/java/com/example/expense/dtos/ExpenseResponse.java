@@ -7,15 +7,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateExpenseRequest {
+public class ExpenseResponse {
 
+    public String id;
     public String name;
     public Double amount;
     public LocalDate date;
-    public String description;
 }

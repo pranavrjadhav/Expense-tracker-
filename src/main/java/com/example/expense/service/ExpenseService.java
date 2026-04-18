@@ -1,10 +1,16 @@
 package com.example.expense.service;
 
 import com.example.expense.dtos.CreateExpenseRequest;
+import com.example.expense.dtos.ExpensePageResponse;
+import com.example.expense.dtos.ExpenseResponse;
 import com.example.expense.dtos.UpdateExpenseRequest;
 import com.example.expense.entity.Expense;
 import com.example.expense.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,8 +43,33 @@ public class ExpenseService {
 
     }
 
-    public List<Expense> getAllExpenses() {
-        return expenseRepository.findAll();
+    public ExpensePageResponse getAllExpenses(Pageable pageable) {
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "date")
+        );
+
+        Page<Expense> page = expenseRepository.findAll(sortedPageable);
+
+        List<ExpenseResponse> list = page.getContent().stream().map(exp -> {
+            ExpenseResponse res = new ExpenseResponse();
+            res.id = exp.getExpenseId();
+            res.name = exp.getName();
+            res.amount = exp.getAmount();
+            res.date = exp.getDate();
+            return res;
+        }).toList();
+
+        ExpensePageResponse response = new ExpensePageResponse();
+        response.data = list;
+        response.page = page.getNumber();
+        response.size = page.getSize();
+        response.totalElements = page.getTotalElements();
+        response.totalPages = page.getTotalPages();
+
+        return response;
     }
 
     public Expense getExpenseById(String expenseId) {
@@ -52,6 +83,9 @@ public class ExpenseService {
         Expense expense = expenseRepository.findByExpenseId(expenseId)
                 .orElseThrow(() -> new RuntimeException("Expense not found"));
 
+        if(req.name != null){
+            expense.setName(req.name);
+        }
         if (req.amount != null) {
             expense.setAmount(req.amount);
         }
